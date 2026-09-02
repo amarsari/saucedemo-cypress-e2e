@@ -1,0 +1,59 @@
+Scenario 1 (Happy Path - Critical Journey): Successful Login & Session Verification
+
+Given: the user is on the login page.
+
+When: the user enters a valid username and password and clicks the login button
+
+Then: the user should be redirected to /inventory.html
+
+And: the product catalog title ("Products") shuold be visible.
+
+Code:
+
+//Testing authentication with valid credentials
+it('TC-AUTH-001: Should log in successfully with valid credentials', () => {
+    cy.visit('https://www.saucedemo.com/');
+    
+    //using data-test attributes for resilience
+    cy.get('[data-test="username"]').type('standard_user');
+    cy.get('[data-test="password"]').type('secret_sauce');
+    cy.get('[data-test="login-button"]').click();
+
+    //Assert redirection
+    cy.url().should('include', '/inventory.html');
+    
+    //Verify the inventory header / title is visible
+    cy.get('[data-test="title"]').should('be.visible').and('have.text', 'Products');
+});
+
+//Testing authentication with invalid credentials
+it('TC_AUTH-002: Should fail to log in with invalid credentials', () => {
+    cy.visit('https://www.saucedemo.com/');
+
+    cy.get('[data-test="username"]').type('standard_user');
+    cy.get('[data-test="password"]').type('wrong_password');
+    cy.get('[data-test="login-button"]').click();
+    
+    cy.get('[data-test="error"]')
+        .should('be.visible')
+        .and('contain.text', 'Username and password do not match any user in this service');
+});
+
+//Testing empty fields
+it('TC-AUTH-003: Should display an error when fields are empty', () => {
+    cy.visit('https://saucedemo.com/');
+
+    cy.get('[data-test="login-button"]').click();
+
+    cy.get('[data-test="error"]')
+        .should('be.visible')
+        .and('contain.text', 'Username is required');
+});
+
+Level Up DRY - Don't Repeat Yourself
+
+
+
+
+
+
