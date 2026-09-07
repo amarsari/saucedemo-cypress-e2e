@@ -1,0 +1,25 @@
+{
+  "name": "qa_testcases",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test": "cypress run --headless"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amarsari/saucedemo-cypress-e2e.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/amarsari/saucedemo-cypress-e2e/issues"
+  },
+  "homepage": "https://github.com/amarsari/saucedemo-cypress-e2e#readme",
+  "description": "",
+  "devDependencies": {
+    "cypress": "^16.0.0"
+  }
+}
