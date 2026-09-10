@@ -1,91 +1,83 @@
+import LoginPage from '../support/pages/LoginPage';
+import InventoryPage from '../support/pages/InventoryPage';
+import CartPage from '../support/pages/CartPage';
+import CheckoutPage from '../support/pages/CheckoutPage';
+
 describe ('Saucedemo - E2E Order fulfillment', () =>{
     beforeEach(() => {
-        cy.login();
+        LoginPage.visit();
+        LoginPage.login('standard_user', 'secret_sauce');
     });
+    
+    //Product to be added to cart
+    const productSlug = 'sauce-labs-backpack';
+    const itemTitle = 'Sauce Labs Backpack';
+    const itemPrice = '29.99';
+    //****************************
 
     //Scenario A (Form Validation / Negative Test): Add item -> go to cart -> click "Checkout". 
     // Leave inputs blank or type invalid info -> click "Continue" -> assert error message: "Error: First Name is required".
     it ('TC-CHECKOUT-001: Form Validation / Negative Test', () =>{
-       cy.get('[data-test="add-to-cart-sauce-labs-backpack"]').click();
-       
-       // Cart badge assertion
-       cy.get('[data-test="shopping-cart-badge"]')
-            .should('be.visible')
-            .and('contain.text', '1');
-
-        // Navigating to cart
-        cy.get('[data-test="shopping-cart-link"]').click();
-
+        //Adding top item to cart
+        InventoryPage.addItemToCart(productSlug);
+        
+        // Cart badge assertion
+        InventoryPage.assertBadgeCount(1);
+        
+        // Navigating to cart and verifying url
+        InventoryPage.goToCart();
+        
         //Verifying product and price are there
-        cy.get('[data-test="inventory-item-name"]')
-            .should('be.visible')
-            .and('contain.text', 'Sauce Labs Backpack');
-
-        cy.get('[data-test="inventory-item-price"]')
-            .should('be.visible')
-            .and('contain.text', '29.99');
-
+        CartPage.assertCartItemVisible(itemTitle, itemPrice)
+        
         //Clicking Checkout button
-        cy.get('[data-test="checkout"]').click();
-        cy.url().should('include', '/checkout-step-one.html');
-
+        CartPage.proceedToCheckout();
+        
         //Clicking continue
-        cy.get('[data-test="continue"]').click();
-
+        CheckoutPage.clickContinue();
+        
         //Asserting error message
-        cy.get('[data-test="error"]')
-            .should('be.visible')
-            .and('contain.text', 'Error: First Name is required');
-
+        CheckoutPage.assertErrorMessage(/Error: First Name is required/i);
     });
 
     //Scenario B (Cancel Flow): On Checkout Step One, click "Cancel" -> verify redirect back to cart
     // without submitting order.
     it ('TC-CHECKOUT-002: Cancel Flow', () => {
         //Precondition: Add item to cart
-        cy.get('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+        //Adding top item to cart
+        InventoryPage.addItemToCart(productSlug);
         
-        //Navigate to cart
-        cy.get('[data-test="shopping-cart-link"]').click();
-
-        //Verify where we are
-        cy.url().should('include', '/cart.html');
+        //Navigate to cart and verify url
+        InventoryPage.goToCart();
 
         //Click Checkout and move on to next step
-        cy.get('[data-test="checkout"]').click();
-
-        //Verify we are at step 1
-        cy.url().should('include', '/checkout-step-one.html');
+        CartPage.proceedToCheckout();
 
         //Click Cancel button and verify we are back at cart
-        cy.get('[data-test="cancel"]').click();
+        CheckoutPage.clickCancel();
         cy.url().should('include', '/cart.html');
     });
 
     //Scenatio C: Abort checkout at step 2 and return to inventory
     it ('TC-CHECKOUT-003: Abort checkout at step 2 and return to inventory', () => {
         //Precondition: Add item to cart
-        cy.get('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+        InventoryPage.addItemToCart(productSlug);
 
         //Navigate to cart and verify url
-        cy.get('[data-test="shopping-cart-link"]').click();
-        cy.url().should('include', '/cart.html');
-
+        InventoryPage.goToCart();
+        
         //Click checkout and verify url
-        cy.get('[data-test="checkout"]').click();
-        cy.url().should('include', '/checkout-step-one.html');
+        CartPage.proceedToCheckout();
 
         //Fill out form and hit continue button
-        cy.get('[data-test="firstName"]').type("John");
-        cy.get('[data-test="lastName"]').type("Doe");
-        cy.get('[data-test="postalCode"]').type("12345");
-        cy.get('[data-test="continue"]').click();
+        CheckoutPage.fillInformation('John', 'Doe', '12345');
+        CheckoutPage.clickContinue();
 
         //Verify we are at step 2
         cy.url().should('include', '/checkout-step-two.html');
 
         //Click Cancel and verify we are back at inventory page.
-        cy.get('[data-test="cancel"]').click();
+        CheckoutPage.clickCancel();
         cy.url().should('include', '/inventory.html');
     });
 
@@ -94,50 +86,29 @@ describe ('Saucedemo - E2E Order fulfillment', () =>{
     // Click "Finish" -> assert header displays "Thank you for your order!".
     it ('TC-CHECKOUT-004: Complete Order', () => {
         //Precondition: Add item to cart
-        cy.get('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+        InventoryPage.addItemToCart(productSlug);
 
         //Verify Cart Badge
-        cy.get('[data-test="shopping-cart-badge"]')
-            .should('be.visible')
-            .and('contain.text', '1');
-
-        //Navigate to Cart
-        cy.get('[data-test="shopping-cart-link"]').click();
-
-        //Verify we are at cart page
-        cy.url().should('include', '/cart.html');
+        InventoryPage.assertBadgeCount(1);
+        
+        //Navigate to Cart and verify
+        InventoryPage.goToCart();
 
         //Click Checkout and verify url
-        cy.get('[data-test="checkout"]').click();
-        cy.url().should('include', '/checkout-step-one.html');
-
+        CartPage.proceedToCheckout();
+        
         //Fill out form and hit continue button
-        cy.get('[data-test="firstName"]').type("John");
-        cy.get('[data-test="lastName"]').type("Doe");
-        cy.get('[data-test="postalCode"]').type("12345");
-        cy.get('[data-test="continue"]').click();
+        CheckoutPage.fillInformation('John', 'Doe', '12345');
+        CheckoutPage.clickContinue();
 
         //Verify we are at step 2
         cy.url().should('include', '/checkout-step-two.html');
 
         //Assert Overview Page Totals
-        cy.get('[data-test="subtotal-label"]')
-            .should('be.visible')
-            .and('contain.text', 'Item total: $29.99');
-        
-        cy.get('[data-test="tax-label"]')
-            .should('be.visible')
-            .and('contain.text', 'Tax: $2.40');
-        
-        cy.get('[data-test="total-label"]')
-            .should('be.visible')
-            .and('contain.text', 'Total: $32.39');
+        CheckoutPage.assertTotals('29.99', '2.40', '32.39');
 
         //Click Finish and verify we are at the confirmation page and header displays proper message.
-        cy.get('[data-test="finish"]').click();
-        cy.url().should('include', '/checkout-complete.html');
-        cy.get('[data-test="complete-header"]')
-            .should('be.visible')
-            .and('contain.text', 'Thank you for your order!');
+        CheckoutPage.finishOrder();
+        CheckoutPage.assertOrderSuccess();
     });
 });
