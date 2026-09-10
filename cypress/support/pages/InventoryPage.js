@@ -8,7 +8,7 @@ class InventoryPage {
         return cy.get('[data-test="shopping-cart-link"]');
     }
 
-    get sortDropdown(){
+    get sortDropdown() {
         return cy.get('[data-test="product-sort-container"]');
     }
 
@@ -32,8 +32,34 @@ class InventoryPage {
     }
 
     selectSortOption(optionValue){
-        this.sortDropDown.select(optionValue);
+        this.sortDropdown.select(optionValue);
     }
+
+    // Dynamic price verification
+assertSortedByPrice(order = 'asc') {
+  cy.get('[data-test="inventory-item-price"]')
+    .then(($prices) => {
+      const actualPrices = [...$prices].map((el) =>
+        parseFloat(el.innerText.replace('$', ''))
+      );
+      const expectedPrices = [...actualPrices].sort((a, b) =>
+        order === 'asc' ? a - b : b - a
+      );
+      expect(actualPrices).to.deep.equal(expectedPrices);
+    });
+}
+
+// Dynamic name verification
+assertSortedByName(order = 'asc') {
+  cy.get('[data-test="inventory-item-name"]')
+    .then(($names) => {
+      const actualNames = [...$names].map((el) => el.innerText.trim());
+      const expectedNames = [...actualNames].sort((a, b) =>
+        order === 'asc' ? a.localeCompare(b) : b.localeCompare(a)
+      );
+      expect(actualNames).to.deep.equal(expectedNames);
+    });
+}
 
     assertBadgeCount(expectedCount){
         if (expectedCount === 0) {
@@ -47,6 +73,7 @@ class InventoryPage {
         cy.get('[data-test="inventory-item-name"]').should('contain.text', name);
         cy.get('[data-test="inventory-item-price"]').should('contain.text', price);
     }
+
 }
 
 export default new InventoryPage();
