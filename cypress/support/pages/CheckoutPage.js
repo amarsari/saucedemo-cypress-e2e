@@ -82,9 +82,7 @@ class CheckoutPage {
     assertErrorMessage(expectedPattern) {
         this.errorMessage
             .should('be.visible')
-            .and(($el) => {
-            expect($el.text()).to.match(expectedPattern);
-            });
+            .and('include.text', expectedPattern);
     }
 }
 

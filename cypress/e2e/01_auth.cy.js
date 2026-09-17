@@ -1,4 +1,5 @@
 import LoginPage from '../support/pages/LoginPage';
+import users from '../fixtures/users.json';
 
 describe ('Saucedemo - Authentication Tests', () => {
     beforeEach(() =>{
@@ -7,7 +8,7 @@ describe ('Saucedemo - Authentication Tests', () => {
     
     //Happy path: Valid username and password redirects to inventory.html
     it ('TC-AUtH-001: Successful login with valid credentials', () => {
-        LoginPage.login('standard_user', 'secret_sauce');
+        LoginPage.login(users.standardUser.username, users.standardUser.password);
 
         cy.url().should('include', '/inventory.html');
         cy.get('[data-test="title"]')
@@ -17,16 +18,16 @@ describe ('Saucedemo - Authentication Tests', () => {
 
     //Sad path: Invalid credentials display proper error message
     it('TC-AUth-002: Failed login with invalid credentials', () =>{
-        LoginPage.login('invalid_user', 'invalid_password');
+        LoginPage.login(users.invalidUser.username, users.invalidUser.password);
 
-        LoginPage.assertErrorMessage(/username and password do not match/i);
+        LoginPage.assertErrorMessage(users.invalidUser.errorMessage);
     });
 
     //Edge case scenario: Locked-out user displays proper error message
     it('TC-AUTH-003: Locked-out user with error message', () =>{
-        LoginPage.login('locked_out_user', 'secret_sauce');
+        LoginPage.login(users.lockedOutUser.username, users.lockedOutUser.password);
 
-        LoginPage.assertErrorMessage(/Epic sadface: Sorry, this user has been locked out./i);
+        LoginPage.assertErrorMessage(users.lockedOutUser.errorMessage);
 
     });
 });

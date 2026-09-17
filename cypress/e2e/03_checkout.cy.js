@@ -2,24 +2,20 @@ import LoginPage from '../support/pages/LoginPage';
 import InventoryPage from '../support/pages/InventoryPage';
 import CartPage from '../support/pages/CartPage';
 import CheckoutPage from '../support/pages/CheckoutPage';
+import checkOutData from  '../fixtures/checkoutData.json';
+import users from '../fixtures/users.json';
 
 describe ('Saucedemo - E2E Order fulfillment', () =>{
     beforeEach(() => {
         LoginPage.visit();
-        LoginPage.login('standard_user', 'secret_sauce');
+        LoginPage.login(users.standardUser.username, users.standardUser.password);
     });
-    
-    //Product to be added to cart
-    const productSlug = 'sauce-labs-backpack';
-    const itemTitle = 'Sauce Labs Backpack';
-    const itemPrice = '29.99';
-    //****************************
 
     //Scenario A (Form Validation / Negative Test): Add item -> go to cart -> click "Checkout". 
     // Leave inputs blank or type invalid info -> click "Continue" -> assert error message: "Error: First Name is required".
     it ('TC-CHECKOUT-001: Form Validation / Negative Test', () =>{
         //Adding top item to cart
-        InventoryPage.addItemToCart(productSlug);
+        InventoryPage.addItemToCart(checkOutData.targetProduct.slug);
         
         // Cart badge assertion
         InventoryPage.assertBadgeCount(1);
@@ -28,7 +24,7 @@ describe ('Saucedemo - E2E Order fulfillment', () =>{
         InventoryPage.goToCart();
         
         //Verifying product and price are there
-        CartPage.assertCartItemVisible(itemTitle, itemPrice)
+        CartPage.assertCartItemVisible(checkOutData.targetProduct.title, checkOutData.targetProduct.price);
         
         //Clicking Checkout button
         CartPage.proceedToCheckout();
@@ -37,7 +33,7 @@ describe ('Saucedemo - E2E Order fulfillment', () =>{
         CheckoutPage.clickContinue();
         
         //Asserting error message
-        CheckoutPage.assertErrorMessage(/Error: First Name is required/i);
+        CheckoutPage.assertErrorMessage(checkOutData.errors.firstNameRequired);
     });
 
     //Scenario B (Cancel Flow): On Checkout Step One, click "Cancel" -> verify redirect back to cart
@@ -45,7 +41,7 @@ describe ('Saucedemo - E2E Order fulfillment', () =>{
     it ('TC-CHECKOUT-002: Cancel Flow', () => {
         //Precondition: Add item to cart
         //Adding top item to cart
-        InventoryPage.addItemToCart(productSlug);
+        InventoryPage.addItemToCart(checkOutData.targetProduct.slug);
         
         //Navigate to cart and verify url
         InventoryPage.goToCart();
@@ -61,7 +57,7 @@ describe ('Saucedemo - E2E Order fulfillment', () =>{
     //Scenatio C: Abort checkout at step 2 and return to inventory
     it ('TC-CHECKOUT-003: Abort checkout at step 2 and return to inventory', () => {
         //Precondition: Add item to cart
-        InventoryPage.addItemToCart(productSlug);
+        InventoryPage.addItemToCart(checkOutData.targetProduct.slug);
 
         //Navigate to cart and verify url
         InventoryPage.goToCart();
@@ -70,7 +66,11 @@ describe ('Saucedemo - E2E Order fulfillment', () =>{
         CartPage.proceedToCheckout();
 
         //Fill out form and hit continue button
-        CheckoutPage.fillInformation('John', 'Doe', '12345');
+        CheckoutPage.fillInformation(
+            checkOutData.validCustomer.firstName,
+            checkOutData.validCustomer.lastName,
+            checkOutData.validCustomer.postalCode
+        );
         CheckoutPage.clickContinue();
 
         //Verify we are at step 2
@@ -86,7 +86,7 @@ describe ('Saucedemo - E2E Order fulfillment', () =>{
     // Click "Finish" -> assert header displays "Thank you for your order!".
     it ('TC-CHECKOUT-004: Complete Order', () => {
         //Precondition: Add item to cart
-        InventoryPage.addItemToCart(productSlug);
+        InventoryPage.addItemToCart(checkOutData.targetProduct.slug);
 
         //Verify Cart Badge
         InventoryPage.assertBadgeCount(1);
@@ -98,14 +98,22 @@ describe ('Saucedemo - E2E Order fulfillment', () =>{
         CartPage.proceedToCheckout();
         
         //Fill out form and hit continue button
-        CheckoutPage.fillInformation('John', 'Doe', '12345');
+        CheckoutPage.fillInformation(
+            checkOutData.validCustomer.firstName,
+            checkOutData.validCustomer.lastName,
+            checkOutData.validCustomer.postalCode
+        );
         CheckoutPage.clickContinue();
 
         //Verify we are at step 2
         cy.url().should('include', '/checkout-step-two.html');
 
         //Assert Overview Page Totals
-        CheckoutPage.assertTotals('29.99', '2.40', '32.39');
+        CheckoutPage.assertTotals(
+            checkOutData.orderPricing.subtotal,
+            checkOutData.orderPricing.tax,
+            checkOutData.orderPricing.total
+        );
 
         //Click Finish and verify we are at the confirmation page and header displays proper message.
         CheckoutPage.finishOrder();

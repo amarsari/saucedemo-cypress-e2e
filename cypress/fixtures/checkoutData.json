@@ -1,0 +1,22 @@
+{
+  "validCustomer": {
+    "firstName": "Tony",
+    "lastName": "QA",
+    "postalCode": "13480-000"
+  },
+  "errors": {
+    "firstNameRequired": "Error: First Name is required",
+    "lastNameRequired": "Error: Last Name is required",
+    "postalCodeRequired": "Error: Postal Code is required"
+  },
+  "targetProduct": {
+    "slug": "sauce-labs-backpack",
+    "title": "Sauce Labs Backpack",
+    "price": "29.99"
+  },
+  "orderPricing": {
+    "subtotal": "29.99",
+    "tax": "2.40",
+    "total": "32.39"
+  }
+}
