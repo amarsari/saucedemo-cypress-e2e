@@ -16,6 +16,9 @@ An end-to-end (E2E) test automation framework built for [SauceDemo](https://www.
 * **Resilient Locators:** Strict prioritization of dedicated testing attributes (`[data-test="..."]`) over layout-dependent CSS classes to prevent test decay across frontend redesigns.
 * **Dynamic DOM Assertions:** Catalog sorting assertions (A-Z, Z-A, Price Low-High, Price High-Low) extract text and price data into runtime arrays and validate against algorithmic sorting logic, avoiding hardcoded static expectations.
 * **CI/CD Integration:** Configured via GitHub Actions (`.github/workflows/cypress.yml`) to automatically execute the full headless suite in Google Chrome on every push and pull request, archiving test artifacts on failure.
+* **Programmatic Session & State Injection (`session-persistence.cy.js`):** 
+  - Bypasses UI login screens by injecting authentication session cookies (`session-username`) directly via `cy.setCookie()`.
+  - Pre-seeds cart contents into `localStorage` (`cart-contents`) during `onBeforeLoad`, isolating feature tests and significantly reducing execution time.
 
 ---
 
